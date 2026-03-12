@@ -1974,18 +1974,6 @@ function renderLiquidation() {
         if (creditor.balance < 10) creditors.shift();
     }
     transfersEl.innerHTML = transfersHtml || '<p style="text-align:center; font-size:0.8rem; color:var(--text-secondary); padding: 10px;">¡Mesa Equilibrada! No hay deudas pendientes.</p>';
-
-    // 4. Estadísticas Finales (Auditoría)
-    statsEl.innerHTML = `
-        <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px;">
-            ${state.players.map(p => `
-                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; padding: 4px 0; border-bottom: 1px dashed var(--glass-border);">
-                    <span style="font-weight:600;">${p.name}</span>
-                    <span style="color:var(--text-secondary);">⛰️ ${totalStats[p.id].montanas} | 🕳️ ${totalStats[p.id].tripas} | 🥤 ${totalStats[p.id].medias}</span>
-                </div>
-            `).join('')}
-        </div>
-    `;
 }
 
 // Exportar para uso futuro en módulos
