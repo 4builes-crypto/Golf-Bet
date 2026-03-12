@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golf Bet | Premium Scoring</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container fade-in">
+        <!-- Pestaña: Resumen Ronda -->
+        <div id="view-ronda" class="tab-view">
+            <header>
+                <div class="logo" style="flex-direction: row; align-items: center; gap: -5px;">
+                    <img src="logo sin fondo Background Removed.png" alt="Golf Bet"
+                        style="width: 100px; height: 100px; object-fit: contain; filter: drop-shadow(0 0 8px var(--accent-color)); margin-left: -20px;">
+                    <h1 style="font-size: 2rem; margin-left: -15px;">Golf Bet</h1>
+                </div>
+                <button onclick="openCourseModal()" class="status-badge"
+                    style="cursor: pointer; border: 1px solid var(--accent-color); background: rgba(52, 124, 44, 0.1); color: var(--accent-color); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Nueva
+                    Ronda</button>
+            </header>
+
+            <section class="card" style="margin-bottom: 15px; text-align: center; padding: 15px;">
+                <h2 id="current-course-name" style="margin: 0; color: var(--accent-color); font-size: 1.2rem;">Sin Campo
+                    Seleccionado</h2>
+                <p id="current-course-par" style="margin: 5px 0 0 0; color: var(--text-secondary); font-size: 0.9rem;">
+                    Par: --</p>
+            </section>
+
+            <section class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">Leaderboard</h2>
+                    <button onclick="openPlayerModal()"
+                        style="background: var(--accent-color); border: none; border-radius: 8px; color: white; padding: 6px 12px; font-size: 0.8rem; cursor: pointer;">+
+                        Añadir</button>
+                </div>
+                <table class="scorecard-table">
+                    <thead>
+                        <tr>
+                            <th>Jugador</th>
+                            <th style="text-align: center;">Neto</th>
+                        </tr>
+                    </thead>
+                    <tbody id="player-list">
+                        <!-- Se llena dinámicamente con JS -->
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="card">
+                <h2>Apuestas Activas</h2>
+                <div id="bets-summary-list" class="bet-summary">
+                    <!-- Dinámico con JS -->
+                    <p style="text-align: center; color: var(--text-secondary); font-size: 0.8rem; padding: 10px;">No
+                        hay apuestas activas en esta ronda.</p>
+                </div>
+            </section>
+
+            <div style="margin-top: 20px;">
+                <button id="main-action-btn" class="btn">Ingresar Score Hoyo 1</button>
+            </div>
+        </div>
+
+        <!-- Pestaña: Apuestas -->
+        <div id="view-apuestas" class="tab-view hidden">
+            <header>
+                <h1 style="font-size: 1.2rem; font-weight: 700;">Gestión de Apuestas</h1>
+            </header>
+
+            <section class="card">
+                <h2>Detalle de Apuestas</h2>
+                <div id="bets-detailed-list" class="bet-summary">
+                    <!-- Dinámico con JS -->
+                    <p style="text-align: center; color: var(--text-secondary); font-size: 0.8rem; padding: 20px;">
+                        Utiliza el botón inferior para configurar tu primera apuesta.</p>
+                </div>
+            </section>
+
+            <button class="btn" onclick="openBetModal()"
+                style="background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); margin-top: 10px;">
+                + Configurar Nueva Apuesta
+            </button>
+        </div>
+
+        <!-- Modal: Configurar Apuesta -->
+        <div id="modal-bet" class="modal hidden">
+            <div class="modal-content card fade-in">
+                <header style="margin-bottom: 20px;">
+                    <h2 style="color: white; margin: 0; text-transform: none;">Configurar Apuesta</h2>
+                    <button onclick="closeBetModal()"
+                        style="background:none; border:none; color:var(--text-secondary); font-size:1.5rem;">×</button>
+                </header>
+
+                <div class="form-group">
+                    <label>Sugerencias Populares (COP)</label>
+                    <div class="bet-suggestions">
+                        <div class="chip"
+                            onclick="selectSuggestion('Skins', 10000, 'COP', 'Gana el jugador que haga el score más bajo en solitario en cada hoyo.')">
+                            Skins ($10k)</div>
+                        <div class="chip"
+                            onclick="selectSuggestion('Match Play', 50000, 'COP', 'Gana el jugador u equipo con más hoyos ganados al final de la ronda.')">
+                            Match Play ($50k)</div>
+                        <div class="chip"
+                            onclick="selectSuggestion('Nassau', 30000, 'COP', 'Tres apuestas en una: Mejores primeros 9 hoyos, mejores segundos 9 hoyos, y mejor total.')">
+                            Nassau ($30k)</div>
+                        <div class="chip"
+                            onclick="selectSuggestion('Robin', 20000, 'COP', 'Parejas cambiantes cada 6 hoyos. Gana el jugador con más puntos individuales acumulados al terminar los 3 tramos.')">
+                            Robin ($20k)</div>
+                        <div class="chip"
+                            onclick="selectSuggestion('Hoyos', 5000, 'COP', 'Se apuesta una cantidad fija por cada hoyo ganado.')">
+                            Hoyo a Hoyo ($5k)</div>
+                    </div>
+                    <p id="bet-description"
+                        style="margin-top: 10px; font-size: 0.8rem; color: var(--accent-color); font-style: italic; min-height: 1.2rem;">
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label>Título de la Apuesta</label>
+                    <input type="text" id="bet-title" class="form-input" placeholder="Nombre personalizado">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>Monto Base (COP)</label>
+                        <input type="number" id="bet-amount" class="form-input" placeholder="0" inputmode="numeric"
+                            pattern="[0-9]*">
+                        <input type="hidden" id="bet-currency" value="COP">
+                    </div>
+
+                    <div class="form-group" id="bet-point-group" style="display: none; margin-bottom: 0;">
+                        <label>Valor por Punto (COP)</label>
+                        <input type="number" id="bet-point-amount" class="form-input" placeholder="5000"
+                            inputmode="numeric" pattern="[0-9]*">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn" style="background: rgba(255,255,255,0.1); flex: 1;"
+                        onclick="closeBetModal()">Cancelar</button>
+                    <button class="btn" style="flex: 2;" onclick="addBet()">Activar Apuesta</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestaña: Full Scorecard (Hoyos) -->
+        <div id="view-hoyos" class="tab-view hidden">
+            <header>
+                <h1 style="font-size: 1.2rem; font-weight: 700;">Scorecard Compacto</h1>
+            </header>
+
+            <section class="card" style="padding: 10px;">
+                <h3 style="font-size: 0.8rem; color: var(--accent-color); margin-bottom: 10px;">Front 9 (H1-H9)</h3>
+                <div class="scorecard-grid-container">
+                    <table class="compact-scorecard" id="table-front">
+                        <!-- Llenado por JS -->
+                    </table>
+                </div>
+
+                <h3 style="font-size: 0.8rem; color: var(--accent-color); margin: 15px 0 10px;">Back 9 (H10-H18)</h3>
+                <div class="scorecard-grid-container">
+                    <table class="compact-scorecard" id="table-back">
+                        <!-- Llenado por JS -->
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- Modal: Seleccionar Campo -->
+        <div id="modal-course" class="modal hidden">
+            <div class="modal-content card fade-in">
+                <header style="margin-bottom: 20px;">
+                    <h2 style="color: white; margin: 0; text-transform: none;">Seleccionar Campo</h2>
+                    <button onclick="closeCourseModal()"
+                        style="background:none; border:none; color:var(--text-secondary); font-size:1.5rem;">×</button>
+                </header>
+
+                <div class="course-list" id="course-list-container">
+                    <!-- Generado dinámicamente con JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Buscar Campo IA -->
+        <div id="modal-custom-course" class="modal hidden">
+            <div class="modal-content card fade-in">
+                <header style="margin-bottom: 20px;">
+                    <h2 style="color: white; margin: 0; text-transform: none;">Buscar con IA</h2>
+                    <button onclick="closeCustomCourseModal()"
+                        style="background:none; border:none; color:var(--text-secondary); font-size:1.5rem;">×</button>
+                </header>
+
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 15px;">Ingresa el nombre del
+                    campo que deseas jugar y nuestra IA extraerá los hoyos, distancias y pares oficiales.</p>
+
+                <form id="custom-course-form" onsubmit="event.preventDefault(); submitCustomCourse();">
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <input type="text" id="ai-course-search" class="form-input"
+                            placeholder="Ej. El Peñón, TPC Sawgrass..." required>
+                    </div>
+
+                    <button type="submit" id="ai-search-btn" class="btn">Buscar Campo</button>
+                    <p id="ai-search-status"
+                        style="display: none; color: var(--accent-color); font-size: 0.85rem; text-align: center; margin-top: 15px; font-weight: 600;">
+                        Consultando base de datos...</p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal: Configurar Ronda -->
+        <div id="modal-round-setup" class="modal hidden">
+            <div class="modal-content card fade-in">
+                <header style="margin-bottom: 20px;">
+                    <h2 style="color: white; margin: 0; text-transform: none;">Configurar Ronda</h2>
+                    <button onclick="closeRoundSetupModal()"
+                        style="background:none; border:none; color:var(--text-secondary); font-size:1.5rem;">×</button>
+                </header>
+
+                <div class="form-group">
+                    <label>Hoyo de Inicio</label>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="btn-start-1" class="btn" style="flex: 1;" onclick="setStartHole(1)">Inicia Hoyo
+                            1</button>
+                        <button id="btn-start-10" class="btn"
+                            style="flex: 1; background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color);"
+                            onclick="setStartHole(10)">Inicia Hoyo 10</button>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 25px;">
+                    <button class="btn" style="flex: 2;" onclick="openSpecialRulesModal()">Siguiente -></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Reglas Especiales (Tripas y Medias) -->
+        <div id="modal-special-rules" class="modal hidden">
+            <div class="modal-content card fade-in" style="max-height: 80vh; overflow-y: auto;">
+                <header style="margin-bottom: 20px;">
+                    <h2 style="color: white; margin: 0; text-transform: none;">Reglas de la Casa</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 5px;">Configura multas y
+                        eventos especiales para toda la ronda.</p>
+                </header>
+
+                <!-- Regla Tripa -->
+                <div class="form-group" style="padding-bottom: 15px; border-bottom: 1px solid var(--glass-border);">
+                    <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+                        <span style="font-weight: bold; color: var(--accent-color);">1. Multa por Tripa (3 Putts)</span>
+                        <input type="checkbox" id="rule-tripa-active" checked style="width: auto; margin:0;"
+                            onchange="toggleRuleOptions('tripa-options', this.checked)">
+                    </label>
+                    <div id="tripa-options" style="margin-top: 10px;">
+                        <input type="number" id="rule-tripa-amount" class="form-input" value="15000"
+                            placeholder="Monto COP" inputmode="numeric" pattern="[0-9]*">
+                        <label
+                            style="display: flex; align-items: center; gap: 10px; margin-top: 10px; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer;">
+                            <input type="checkbox" id="rule-tripa2-active" style="width: auto; margin:0;">
+                            Tripa 2: Sólo el ÚLTIMO en hacer tripa en el tramo paga (Modalidad Robin)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Regla Media -->
+                <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+                    <span style="font-weight: bold; color: var(--accent-color);">2. 'Invita a Media'</span>
+                    <input type="checkbox" id="rule-media-active" checked style="width: auto; margin:0;"
+                        onchange="toggleRuleOptions('media-options', this.checked)">
+                </label>
+                <div id="media-options" style="margin-top: 10px;">
+                    <input type="number" id="rule-media-amount" class="form-input" value="10000"
+                        placeholder="Monto por Media (COP)" inputmode="numeric" pattern="[0-9]*">
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">Se asignará esta multa al
+                    jugador que haga 4 putts, no pase marcas rojas, o se salga del green.</p>
+            </div>
+
+            <!-- Regla Montaña -->
+            <div class="form-group"
+                style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--glass-border);">
+                <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+                    <span style="font-weight: bold; color: var(--accent-color);">3. Puntos de 'Montaña'</span>
+                    <input type="checkbox" id="rule-montana-active" checked style="width: auto; margin:0;"
+                        onchange="toggleRuleOptions('montana-options', this.checked)">
+                </label>
+                <div id="montana-options" style="margin-top: 10px;">
+                    <input type="number" id="rule-montana-amount" class="form-input" value="5000"
+                        placeholder="Valor por Montaña (COP)" inputmode="numeric" pattern="[0-9]*">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button class="btn" style="background: rgba(255,255,255,0.1); flex: 1;"
+                    onclick="closeSpecialRulesModal()">Regresar</button>
+                <button class="btn" style="flex: 2;" onclick="confirmSpecialRulesAndStart()">¡Iniciar
+                    Ronda!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Robin (Selección de Parejas) -->
+    <div id="modal-robin" class="modal hidden">
+        <div class="modal-content card fade-in" style="max-height: 80vh; overflow-y: auto;">
+            <header style="margin-bottom: 20px;">
+                <h2 id="modal-robin-title" style="color: white; margin: 0; text-transform: none;">Armar Parejas -
+                    Tramo 1</h2>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 5px;">Elige los equipos para
+                    los próximos 6 hoyos.</p>
+            </header>
+
+            <div id="robin-teams-container">
+                <!-- Se llena con JS -->
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button class="btn" style="flex: 2;" onclick="confirmRobinTeams()">Confirmar Equipos</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Entrada de Score -->
+    <div id="modal-score" class="modal hidden">
+        <div class="modal-content card fade-in">
+            <header style="margin-bottom: 20px;">
+                <h2 id="modal-title" style="color: white; margin: 0; text-transform: none;">Hoyo 1</h2>
+                <p id="modal-hole-par" style="color: var(--accent-color); margin: 5px 0 0 0; font-size: 0.9rem;">Par
+                    --</p>
+                <button onclick="closeModal()"
+                    style="background:none; border:none; color:var(--text-secondary); font-size:1.5rem; position: absolute; top: 15px; right: 15px;">×</button>
+            </header>
+
+            <div id="score-players-container" class="no-scrollbar"
+                style="display: flex; flex-direction: column; gap: 20px; max-height: 55vh; overflow-y: auto;">
+                <!-- Los inputs de los jugadores se generan aquí con JS -->
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button class="btn" style="background: rgba(255,255,255,0.1); flex: 1;"
+                    onclick="closeModal()">Cancelar</button>
+                <button class="btn" style="flex: 2;" onclick="saveScore()">Guardar Hoyo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Añadir Jugador -->
+    <div id="modal-player" class="modal hidden">
+        <div class="modal-content card fade-in">
+            <header style="margin-bottom: 20px;">
+                <h2 style="color: white; margin: 0; text-transform: none;">Nuevo Jugador</h2>
+                <button onclick="closePlayerModal()"
+                    style="background:none; border:none; color:var(--text-secondary); font-size:1.5rem;">×</button>
+            </header>
+
+            <div class="form-group">
+                <label>Nombre del Jugador</label>
+                <input type="text" id="new-player-name" class="form-input" placeholder="Ej: Camilo Ruiz">
+            </div>
+
+            <div class="form-group">
+                <label>Handicap</label>
+                <input type="number" id="new-player-hcp" class="form-input" placeholder="0.0" step="0.1"
+                    inputmode="decimal">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn" style="background: rgba(255,255,255,0.1); flex: 1;"
+                    onclick="closePlayerModal()">Cancelar</button>
+                <button class="btn" style="flex: 2;" onclick="addPlayer()">Agregar Jugador</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pestaña: Perfil -->
+    <div id="view-perfil" class="tab-view hidden">
+        <header>
+            <h1 style="font-size: 1.2rem; font-weight: 700;">Mi Perfil</h1>
+        </header>
+
+        <!-- Sección: No autenticado (Login/Registro) -->
+        <section id="auth-section" class="card">
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="switchAuth('login')">Entrar</div>
+                <div class="auth-tab" onclick="switchAuth('register')">Registrarse</div>
+            </div>
+
+            <div id="login-form">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" class="form-input" placeholder="ejemplo@golf.com">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" class="form-input" placeholder="••••••••">
+                </div>
+                <button class="btn" onclick="handleLogin()">Entrar</button>
+            </div>
+
+            <div id="register-form" class="hidden">
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" class="form-input" placeholder="Tu nombre">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" class="form-input" placeholder="ejemplo@golf.com">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" class="form-input" placeholder="Mínimo 8 caracteres">
+                </div>
+                <button class="btn" onclick="handleRegister()">Crear Cuenta</button>
+            </div>
+        </section>
+
+        <!-- Sección: Perfil de Usuario -->
+        <section id="profile-details" class="card hidden">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div id="profile-avatar" class="avatar"
+                    style="width: 80px; height: 80px; font-size: 2rem; margin: 0 auto 10px;">--</div>
+                <h2 id="profile-name" style="color: white; margin: 0; text-transform: none; letter-spacing: normal;">
+                    Cargando...</h2>
+                <p id="profile-email-display" style="color: var(--text-secondary); font-size: 0.9rem;">email@...</p>
+            </div>
+
+            <div class="user-stats">
+                <div class="stat-item"
+                    style="grid-column: span 2; display: flex; align-items: center; justify-content: space-between; padding: 20px;">
+                    <span class="stat-label">Handicap</span>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="profile-hcp" class="form-input"
+                            style="width: 80px; text-align: center; padding: 8px; margin: 0;" step="0.1" value="0"
+                            inputmode="decimal">
+                        <button onclick="updateHandicap()"
+                            style="background: var(--accent-color); border: none; border-radius: 8px; color: white; padding: 8px 12px; cursor: pointer; font-size: 0.8rem;">Guardar</button>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="stat-rounds">0</span>
+                    <span class="stat-label">Rondas</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="stat-best-bet" style="font-size: 1.1rem;">-</span>
+                    <span class="stat-label">Mejor Apuesta</span>
+                </div>
+                <div class="stat-item" style="grid-column: span 2;">
+                    <span class="stat-value" id="stat-discipline"
+                        style="color: var(--gold); font-size: 1.1rem;">-</span>
+                    <span class="stat-label">Disciplina Dominante</span>
+                </div>
+            </div>
+
+            <button class="btn"
+                style="background: transparent; border: 1px solid #ff4d4d; color: #ff4d4d; margin-top: 30px;"
+                onclick="simulateLogout()">
+                Cerrar Sesión
+            </button>
+        </section>
+    </div>
+
+    <!-- Pestaña: Configuración de la Ronda -->
+    <div id="view-config-ronda" class="tab-view hidden">
+        <header>
+            <h1 style="font-size: 1.2rem; font-weight: 700;">Configuración de la Ronda</h1>
+        </header>
+
+        <section class="card">
+            <h2>Ajustes Económicos</h2>
+            <div class="form-group">
+                <label>Valor Multa por Tripa (COP)</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="config-tripa-amount" class="form-input" style="flex: 2;"
+                        placeholder="15000" inputmode="numeric" pattern="[0-9]*">
+                    <button class="btn"
+                        style="flex: 1.2; padding: 12px; font-size: 0.8rem; height: 50px; display: flex; align-items: center; justify-content: center;"
+                        onclick="updateConfigAmounts()">Aplicar</button>
+                </div>
+            </div>
+
+            <div class="form-group"
+                style="margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
+                <label>Valor Multa 'Media' (COP)</label>
+                <input type="number" id="config-media-amount" class="form-input" placeholder="10000" inputmode="numeric"
+                    pattern="[0-9]*">
+                <button class="btn" style="margin-top: 10px; padding: 10px; font-size: 0.8rem;"
+                    onclick="updateConfigExtraRules()">Actualizar Multas</button>
+            </div>
+
+            <div class="form-group"
+                style="margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
+                <label>Valor de 'Montaña' (COP)</label>
+                <input type="number" id="config-montana-amount" class="form-input" placeholder="5000"
+                    inputmode="numeric" pattern="[0-9]*">
+                <button class="btn" style="margin-top: 10px; padding: 10px; font-size: 0.8rem;"
+                    onclick="updateConfigExtraRules()">Actualizar Bonos</button>
+            </div>
+
+            <div id="config-robin-settings"
+                style="margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 20px; display: none;">
+                <div class="form-group">
+                    <label>Robin: Monto Base (COP)</label>
+                    <input type="number" id="config-robin-base" class="form-input" placeholder="20000"
+                        inputmode="numeric" pattern="[0-9]*">
+                </div>
+                <div class="form-group">
+                    <label>Robin: Monto por Punto (COP)</label>
+                    <input type="number" id="config-robin-point" class="form-input" placeholder="5000"
+                        inputmode="numeric" pattern="[0-9]*">
+                </div>
+                <button class="btn" style="padding: 12px; font-size: 0.9rem; height: 50px;"
+                    onclick="updateRobinConfig()">Aplicar Ajustes Robin</button>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Gestión de Jugadores</h2>
+            <div id="config-players-list" class="bet-summary">
+                <!-- Se llena con JS -->
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Gestión de Apuestas</h2>
+            <div id="config-bets-list" class="bet-summary">
+                <!-- Se llena con JS -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Pestaña: Liquidación Final -->
+    <div id="view-liquidacion" class="tab-view hidden">
+        <header>
+            <h1 style="font-size: 1.2rem; font-weight: 700;">Liquidación de la Ronda</h1>
+        </header>
+
+        <section class="card">
+            <h2>Resumen de Cierre</h2>
+            <div id="liquidation-summary" class="bet-summary">
+                <!-- Detalle narrativo generado por JS -->
+                <p style="text-align: center; color: var(--text-secondary); font-size: 0.8rem; padding: 20px;">
+                    Carga los datos de la ronda para ver la liquidación.</p>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>¿Quién debe a Quién? (Netting)</h2>
+            <div id="liquidation-transfers" class="bet-summary">
+                <!-- Lista de transferencias finales -->
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Estadísticas de Juego</h2>
+            <div id="liquidation-stats" class="bet-summary">
+                <!-- Montañas y Penalizaciones -->
+            </div>
+            <p style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 15px; text-align: center;">
+                * Para realizar ajustes, dirígete a la pestaña 'Config'.
+            </p>
+        </section>
+    </div>
+
+    <!-- Custom Alert Modal -->
+    <div id="modal-custom-alert" class="modal hidden">
+        <div class="modal-content card fade-in" style="max-width: 320px; text-align: center;">
+            <h3 id="custom-alert-title" style="color: var(--accent-color); margin-top: 0;">Aviso</h3>
+            <p id="custom-alert-message"
+                style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4; margin-bottom: 20px; text-align: left;">
+            </p>
+            <button onclick="closeCustomAlert()" class="btn">Confirmar</button>
+        </div>
+    </div>
+
+    <nav class="nav-bottom">
+        <a href="#" class="nav-item active" data-tab="view-ronda">
+            <span class="nav-icon">○</span>
+            <span>Ronda</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="view-apuestas">
+            <span class="nav-icon">○</span>
+            <span>Apuestas</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="view-hoyos">
+            <span class="nav-icon">○</span>
+            <span>Hoyos</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="view-config-ronda">
+            <span class="nav-icon">○</span>
+            <span>Config</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="view-liquidacion">
+            <span class="nav-icon">○</span>
+            <span>Liq</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="view-perfil">
+            <span class="nav-icon">○</span>
+            <span>Perfil</span>
+        </a>
+    </nav>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
