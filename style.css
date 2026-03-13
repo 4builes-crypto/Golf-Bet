@@ -25,7 +25,9 @@ input::-webkit-inner-spin-button {
 
 input[type=number] {
     -moz-appearance: textfield;
+    -webkit-appearance: none;
     appearance: none;
+    margin: 0;
 }
 
 body {
@@ -458,15 +460,47 @@ header {
 }
 
 .modal-content {
-    width: 100%;
+    width: 90vw;
     max-width: 400px;
     max-height: 90vh;
-    /* Límite estricto de altura */
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    /* Cortar todo lo extra */
+    overflow-y: auto;
     border: 1px solid var(--accent-color);
+}
+
+/* Modal Actions Layout & Responsive */
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    flex-direction: row;
+}
+
+.modal-actions .btn {
+    flex: 1;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.btn-primary {
+    background: var(--accent-color);
+    color: white;
+}
+
+@media (max-width: 420px) {
+    .modal-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .modal-actions .btn {
+        width: 100%;
+        margin: 0;
+    }
 }
 
 /* Counter Input Styles */
