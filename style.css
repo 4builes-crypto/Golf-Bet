@@ -44,7 +44,7 @@ body {
 .container {
     max-width: 500px;
     margin: 0 auto;
-    padding: 90px 20px 120px 20px;
+    padding: 40px 20px 120px 20px;
     /* Aumentado padding superior e inferior */
     position: relative;
     z-index: 1;
@@ -219,6 +219,8 @@ header {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    flex: 1;
     gap: 5px;
 }
 
@@ -522,6 +524,19 @@ header {
     font-size: 1.5rem;
     cursor: pointer;
     transition: background 0.2s;
+}
+
+.counter-input .plus-btn {
+    background: var(--accent-color);
+    font-weight: bold;
+    font-size: 1.8rem;
+}
+
+.counter-input .minus-btn {
+    background: rgba(255, 255, 255, 0.1);
+    font-weight: bold;
+    font-size: 1.8rem;
+    color: #ffbcbc;
 }
 
 .counter-input button:active {

@@ -1269,18 +1269,18 @@ function openModal(overrideHole) {
                 <div class="form-group" style="margin-bottom: 10px;">
                     <label>Golpes (Strokes)</label>
                     <div class="counter-input">
-                        <button onclick="changeValue('strokes-${player.id}', -1, 1)" ${disabledHtml}>-</button>
+                        <button onclick="changeValue('strokes-${player.id}', -1, 1)" ${disabledHtml} class="minus-btn">-</button>
                         <input type="number" id="input-strokes-${player.id}" value="${defaultScore}" readonly>
-                        <button onclick="changeValue('strokes-${player.id}', 1, 1)" ${disabledHtml}>+</button>
+                        <button onclick="changeValue('strokes-${player.id}', 1, 1)" ${disabledHtml} class="plus-btn">+</button>
                     </div>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 0;">
                     <label>Putts</label>
                     <div class="counter-input">
-                        <button onclick="changeValue('putts-${player.id}', -1, 0)" ${disabledHtml}>-</button>
+                        <button onclick="changeValue('putts-${player.id}', -1, 0)" ${disabledHtml} class="minus-btn">-</button>
                         <input type="number" id="input-putts-${player.id}" value="${defaultPutts}" readonly>
-                        <button onclick="changeValue('putts-${player.id}', 1, 0)" ${disabledHtml}>+</button>
+                        <button onclick="changeValue('putts-${player.id}', 1, 0)" ${disabledHtml} class="plus-btn">+</button>
                     </div>
                 </div>
                 ${specialChecksHtml}
@@ -1632,18 +1632,22 @@ function renderConfigRonda() {
         if (state.bets.length === 0) {
             betsList.innerHTML = '<p style="text-align: center; color: var(--text-secondary); font-size: 0.8rem;">No hay apuestas configuradas.</p>';
         } else {
-            betsList.innerHTML = state.bets.map(b => `
+            betsList.innerHTML = state.bets.map(b => {
+                const isRobin = b.title.toLowerCase().includes('robin');
+                const extraInfo = isRobin ? ` | Punto: ${formatMoneyCOP(b.pointValue || 5000)}` : '';
+                return `
                 <div class="bet-item" style="border-bottom: 1px solid var(--glass-border); padding: 10px 0;">
                     <div>
                         <p style="margin:0; font-weight:600;">${b.title}</p>
-                        <p style="margin:0; font-size:0.7rem; color:var(--text-secondary);">${formatMoneyCOP(b.amount)} - ${b.type}</p>
+                        <p style="margin:0; font-size:0.7rem; color:var(--text-secondary);">${formatMoneyCOP(b.amount)} - ${b.type}${extraInfo}</p>
                     </div>
                     <div style="display: flex; gap: 5px;">
                         <button onclick="editBetAmountFromConfig('${b.id}')" style="background:var(--accent-color); color:white; border:none; border-radius:4px; padding:4px 8px; font-size:0.7rem; cursor:pointer;">EDITAR</button>
                         <button onclick="confirmDeleteBetFromConfig('${b.id}')" style="background:#ff4d4d; color:white; border:none; border-radius:4px; padding:4px 8px; font-size:0.7rem; cursor:pointer;">BORRAR</button>
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
     }
 }
@@ -1703,13 +1707,32 @@ function editBetAmountFromConfig(id) {
     const bet = state.bets.find(b => String(b.id) === String(id));
     if (!bet) return;
 
-    const newAmount = prompt(`Ingresa el nuevo monto para "${bet.title}":`, bet.amount);
-    if (newAmount !== null) {
-        const parsed = parseFloat(newAmount);
-        if (!isNaN(parsed)) {
-            bet.amount = parsed;
-            updateUI();
-            showCustomAlert("Apuesta Actualizada", `El monto de "${bet.title}" ha sido cambiado a ${formatMoneyCOP(parsed)}.`);
+    if (bet.title.toLowerCase().includes('robin')) {
+        const newBase = prompt(`Ingresa el nuevo monto base para "${bet.title}":`, bet.amount);
+        if (newBase !== null) {
+            const parsedBase = parseFloat(newBase);
+            if (!isNaN(parsedBase)) {
+                const newPoint = prompt(`Ingresa el nuevo valor por punto para "${bet.title}":`, bet.pointValue || 5000);
+                if (newPoint !== null) {
+                    const parsedPoint = parseFloat(newPoint);
+                    if (!isNaN(parsedPoint)) {
+                        bet.amount = parsedBase;
+                        bet.pointValue = parsedPoint;
+                        updateUI();
+                        showCustomAlert("Apuesta Actualizada", `Monto base: ${formatMoneyCOP(parsedBase)}\nValor por punto: ${formatMoneyCOP(parsedPoint)}`);
+                    }
+                }
+            }
+        }
+    } else {
+        const newAmount = prompt(`Ingresa el nuevo monto para "${bet.title}":`, bet.amount);
+        if (newAmount !== null) {
+            const parsed = parseFloat(newAmount);
+            if (!isNaN(parsed)) {
+                bet.amount = parsed;
+                updateUI();
+                showCustomAlert("Apuesta Actualizada", `El monto de "${bet.title}" ha sido cambiado a ${formatMoneyCOP(parsed)}.`);
+            }
         }
     }
 }
@@ -1743,9 +1766,12 @@ function renderLiquidation() {
         const nulls = p.scores.filter(s => s === null).length;
         if (nulls > 0) missingInfo.push(`${p.name} (${nulls} hoyos pendientes)`);
     });
+    
+    let warningHtml = "";
     if (missingInfo.length > 0) {
-        summaryEl.innerHTML = `<p style="color:#ff4d4d; font-size:0.85rem;"><strong>Auditoría Fallida:</strong> Faltan datos por registrar.<br>${missingInfo.join('<br>')}</p>`;
-        return;
+        warningHtml = `<div style="background: rgba(255, 204, 0, 0.1); border: 1px solid var(--gold); border-radius: 8px; padding: 10px; margin-bottom: 20px;">
+            <p style="color: var(--gold); font-size: 0.8rem; margin: 0; text-align: center;"><strong>Liquidación en Tiempo Real</strong><br>Esta es una proyección. Faltan hoyos por completar.</p>
+        </div>`;
     }
 
     // 1. Auditoría de Variables (Barrido Total)
@@ -1922,7 +1948,7 @@ function renderLiquidation() {
     });
 
     // 2. Reporte de Cierre Detallado (Narrativo)
-    summaryEl.innerHTML = state.players.map(p => {
+    summaryEl.innerHTML = warningHtml + state.players.map(p => {
         const bal = playerBalances[p.id];
         const statusColor = bal.total >= 0 ? 'var(--accent-color)' : '#ff4d4d';
         return `
